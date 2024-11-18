@@ -1,10 +1,12 @@
-" use client ";
 import BloodPosts from "@/components/ui/BloodPosts";
+import React from "react";
 
-export default function Home() {
+const BloodPostPage = () => {
   return (
-    <div className="mt-6">
+    <div>
       <BloodPosts />
     </div>
   );
-}
+};
+
+export default BloodPostPage;
