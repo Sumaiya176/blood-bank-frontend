@@ -142,7 +142,7 @@ const BloodPosts = () => {
                         <option value="" disabled>
                           Select a donar
                         </option>
-                        {activeUsersWithoutMe?.map((user: any, i: number) => {
+                        {activeUsersWithoutMe?.map((user: any) => {
                           return (
                             <option key={user?._id} value={user?._id}>
                               {user?.name}
