@@ -1,45 +1,85 @@
 "use client";
 
-import {
-  useAddPostHistoryMutation,
-  useGetBloodPostsQuery,
-} from "@/redux/features/bloodPost/bloodPostApi";
+import { useGetBloodPostsQuery } from "@/redux/features/bloodPost/bloodPostApi";
 import { IBloodPost, IUser } from "@/types/userTypes";
 import React, { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { useAppSelector } from "@/redux/hooks";
-import { useCurrentUser } from "@/redux/features/auth/authSlice";
-import { useActiveUsersQuery } from "@/redux/features/auth/userAuth";
+import {
+  useCurrentUser,
+  useCurrentToken,
+} from "@/redux/features/auth/authSlice";
+import {
+  useActiveUsersQuery,
+  useConnectedUsersQuery,
+} from "@/redux/features/auth/userAuth";
 import { useSendRequestMutation } from "@/redux/features/donarRequest/donarRequestApi";
 import { toast } from "react-hot-toast";
-
-// type Inputs = {
-//   id: string;
-//   gender: string;
-// };
+import { useRouter } from "next/navigation";
 
 const BloodPosts = () => {
   const user = useAppSelector(useCurrentUser);
+  const token = useAppSelector(useCurrentToken);
   const { data } = useGetBloodPostsQuery("");
-  const [addPostBloodHistory] = useAddPostHistoryMutation();
+  const { data: connectUser } = useConnectedUsersQuery("");
+  //const [addPostBloodHistory] = useAddPostHistoryMutation();
   const [addRequest] = useSendRequestMutation();
-  const { data: activeUsers } = useActiveUsersQuery("");
+  //const { data: activeUsers } = useActiveUsersQuery("");
   const [selectedPostValue, setSelectedPostValue] = useState("");
   const [selectedReceiverValue, setSelectedReceiverValue] = useState("");
   // const [isDisable, setIsDisable] = useState(false);
+  const router = useRouter();
 
-  let activeUsersWithoutMe: IUser[];
-  if (activeUsers) {
-    activeUsersWithoutMe = activeUsers?.data?.filter(
-      (activeUser: IUser) => activeUser.name != user?.name
+  const currentUser = useAppSelector(useCurrentUser);
+  const { data: users } = useActiveUsersQuery("");
+
+  let myProfileData;
+  if (users) {
+    myProfileData = users?.data?.filter(
+      (user: IUser) => user.name === currentUser?.name
     );
+  }
 
-    console.log(activeUsersWithoutMe);
+  let posts = data?.data;
+
+  if (token) {
+    if (myProfileData) {
+      posts = posts?.filter(
+        (post: IBloodPost) => post?.district === myProfileData[0]?.district
+      );
+      if (myProfileData[0]?.bloodGroup === "AB+") {
+        posts = posts?.filter((post: IBloodPost) => post?.bloodGroup === "AB+");
+      } else if (myProfileData[0]?.bloodGroup === "A+") {
+        posts = posts?.filter((post: IBloodPost) =>
+          ["A+", "AB+"].includes(post?.bloodGroup)
+        );
+      } else if (myProfileData[0]?.bloodGroup === "B+") {
+        posts = posts?.filter((post: IBloodPost) =>
+          ["B+", "AB+"].includes(post?.bloodGroup)
+        );
+      } else if (myProfileData[0]?.bloodGroup === "O+") {
+        posts = posts?.filter((post: IBloodPost) =>
+          ["O+", "A+", "B+", "AB+"].includes(post?.bloodGroup)
+        );
+      } else if (myProfileData[0]?.bloodGroup === "A-") {
+        posts = posts?.filter((post: IBloodPost) =>
+          ["A-", "A+", "AB+", "AB-"].includes(post?.bloodGroup)
+        );
+      } else if (myProfileData[0]?.bloodGroup === "B-") {
+        posts = posts?.filter((post: IBloodPost) =>
+          ["B-", "B+", "AB+", "AB-"].includes(post?.bloodGroup)
+        );
+      } else if (myProfileData[0]?.bloodGroup === "AB-") {
+        posts = posts?.filter((post: IBloodPost) =>
+          ["AB+", "AB-"].includes(post?.bloodGroup)
+        );
+      }
+    }
   }
 
   // Handle the select change
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSelectChange = (e: { target: { value: any } }, id: string) => {
-    console.log();
     setSelectedPostValue(id);
     setSelectedReceiverValue(e.target.value);
   };
@@ -54,7 +94,6 @@ const BloodPosts = () => {
     };
 
     const requestData = { request };
-    console.log("Form submitted with value:", requestData);
     try {
       const requestInfo = await addRequest(requestData).unwrap();
       if (requestInfo.success === false) {
@@ -67,33 +106,11 @@ const BloodPosts = () => {
     }
   };
 
-  const posts = data?.data;
-
-  const handleAddPostHistory = async (historyId: string) => {
-    const postId = {
-      id: historyId,
-    };
-    const info = {
-      postId,
-    };
-    try {
-      const id = user?.id;
-      const result = await addPostBloodHistory({ id, info }).unwrap();
-      if (result.success === false) {
-        toast.error(result.errMessage);
-      } else {
-        toast.success(result.message);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   return (
     <div className="mb-14">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {posts?.map((post: IBloodPost) => (
-          <div key={post._id} className="card bg-base-100 w-96 shadow-xl">
+          <div key={post._id} className="card bg-base-100 w-76 shadow-xl">
             <div className="card-body">
               <h2 className="card-title">
                 <span className="text-red-600 font-bold">
@@ -102,13 +119,21 @@ const BloodPosts = () => {
                 Blood Group
               </h2>
               <hr className="my-4 text-red-500" />
-              <p>
-                Location:{" "}
-                <span className="text-gray-400">{post?.location}</span>
+              <p className="text-gray-600">
+                District:{" "}
+                <span className="text-gray-600">{post?.district}</span>
               </p>
-              <p>Name: {post?.patientName}</p>
-              <p>Mobile: {post?.contact}</p>
-              <p>Posted: {formatDistanceToNow(new Date(post.createdAt))} ago</p>
+              <p className="text-gray-600">
+                Address: <span className="text-gray-600">{post?.address}</span>
+              </p>
+              <p className="text-gray-600">Name: {post?.patientName}</p>
+              <p className="text-gray-600">
+                Needs {post?.noOfBags} Bags of blood
+              </p>
+              <p className="text-gray-600">Time: {post?.time}</p>
+              <p className="text-gray-600">
+                Posted: {formatDistanceToNow(new Date(post.createdAt))} ago
+              </p>
               <hr className="my-4 text-red-500" />
               <div className="card-actions justify-center">
                 <button
@@ -117,9 +142,9 @@ const BloodPosts = () => {
                       document.getElementById("my_modal_1") as HTMLDialogElement
                     ).showModal()
                   }
-                  className="btn btn-primary"
+                  className="btn bg-cyan-200"
                 >
-                  Send Request
+                  Refer
                 </button>
                 {/* ------------ start modal ---------------- */}
                 <dialog id="my_modal_1" className="modal">
@@ -142,13 +167,19 @@ const BloodPosts = () => {
                         <option value="" disabled>
                           Select a donar
                         </option>
-                        {activeUsersWithoutMe?.map((user: any) => {
-                          return (
-                            <option key={user?._id} value={user?._id}>
-                              {user?.name}
-                            </option>
-                          );
-                        })}
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                        {connectUser?.data[0]?.friends
+                          ?.filter(
+                            (user: IUser) =>
+                              user?.bloodGroup === post?.bloodGroup
+                          )
+                          .map((user: IUser) => {
+                            return (
+                              <option key={user?._id} value={user?._id}>
+                                {user?.name}
+                              </option>
+                            );
+                          })}
                       </select>
                       <br />
 
@@ -162,12 +193,12 @@ const BloodPosts = () => {
                   </div>
                 </dialog>
                 {/* -------------- end modal ---------------- */}
-
                 <button
-                  onClick={() => handleAddPostHistory(post._id)}
+                  onClick={() => router.push(`/bloodPost/${post?._id}`)}
+                  //onClick={() => router.push(`/bloodPost/${post?._id}`)}
                   className="btn btn-primary"
                 >
-                  Accept
+                  Details
                 </button>
               </div>
             </div>

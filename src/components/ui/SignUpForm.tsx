@@ -5,12 +5,14 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useRegistrationMutation } from "@/redux/features/auth/userAuth";
+import { districtData } from "@/utils/districtData";
 type Inputs = {
   name: string;
   email: string;
   password: string;
   age: number;
-  location: string;
+  district: string;
+  bloodGroup: string;
 };
 
 const SignUpForm = () => {
@@ -31,7 +33,6 @@ const SignUpForm = () => {
       } else {
         toast.success(userInfo.message);
       }
-      //console.log("Registration successful", userInfo);
     } catch (err) {
       console.error("Registration error", err);
     }
@@ -58,10 +59,34 @@ const SignUpForm = () => {
       } else {
         setWarningMessage("");
       }
-
-      console.log(userInfo);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.log(err.message);
+    }
+  };
+
+  // finding geolocation function
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+
+          setUserLocation({ latitude, longitude });
+        },
+
+        (error) => {
+          console.error("Error get user location: ", error);
+        }
+      );
+    } else {
+      console.log("Geolocation is not supported by this browser");
     }
   };
 
@@ -121,6 +146,26 @@ const SignUpForm = () => {
         {errors.password && (
           <span className="text-red-500 text-sm">Password is required</span>
         )}
+        <p>
+          Blood Group <span className="text-red-600">*</span>
+        </p>
+        <select
+          {...register("bloodGroup", { required: true })}
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block h-14 w-full p-2.5"
+          required
+        >
+          <option value="A+">A+</option>
+          <option value="A-">A-</option>
+          <option value="B+">B+</option>
+          <option value="B-">B-</option>
+          <option value="AB+">AB+</option>
+          <option value="AB-">AB-</option>
+          <option value="O+">O+</option>
+          <option value="O-">O-</option>
+        </select>
+        {errors.bloodGroup && (
+          <span className="text-red-500 text-sm">Blood Group is required</span>
+        )}
 
         <p>
           Age <span className="text-red-600">*</span>
@@ -135,22 +180,34 @@ const SignUpForm = () => {
           <span className="text-red-500 text-sm">Age is required</span>
         )}
 
-        <p>
-          Location <span className="text-red-600">*</span>
-        </p>
-        <input
-          className="block input input-bordered input-warning w-full max-w-xs"
-          placeholder="Uttara"
-          {...register("location", { required: true })}
-        />
-        {errors.location && (
-          <span className="text-red-500 text-sm">Location is required</span>
+        <label
+          htmlFor="location"
+          className="block mt-5 mb-2 text-sm font-medium"
+        >
+          District <span className="text-red-600">*</span>
+        </label>
+        <select
+          {...register("district", { required: true })}
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block h-14 w-full p-2.5"
+          required
+        >
+          {districtData?.map(
+            (data: { id: number; districtTitle: string; value: string }) => (
+              <option key={data?.id} value={data?.value}>
+                {data?.districtTitle}
+              </option>
+            )
+          )}
+        </select>
+        {errors.district && (
+          <span className="text-red-500 font-light">District is required</span>
         )}
 
         <div className="flex items-center justify-center">
           <input
             className="block w-full btn font-semibold btn-success text-white"
             type="submit"
+            onClick={() => getUserLocation()}
           />
         </div>
 

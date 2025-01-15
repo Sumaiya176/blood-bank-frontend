@@ -1,10 +1,10 @@
-import ActiveUsers from "@/components/ui/ActiveUsers";
+import MyPost from "@/components/ui/MyPost";
 import React from "react";
 
 const page = () => {
   return (
     <div>
-      <ActiveUsers />
+      <MyPost />
     </div>
   );
 };

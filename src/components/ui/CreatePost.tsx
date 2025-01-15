@@ -6,13 +6,17 @@ import { useAppSelector } from "@/redux/hooks";
 import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "react-hot-toast";
+import { districtData } from "../../utils/districtData";
+import withAuth from "../../utils/withAuth";
 
 type Inputs = {
   bloodGroup: string;
-  location: string;
+  district: string;
+  address: string;
   time: string;
   patientName: string;
   contact: number;
+  noOfBags: number;
   note?: string;
   postCreator: string;
 };
@@ -23,11 +27,9 @@ const CreatePost = () => {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = async (post: Inputs) => {
-    console.log(post);
     post.postCreator = user?.id as string;
 
     const postData = {
@@ -82,18 +84,47 @@ const CreatePost = () => {
                   htmlFor="location"
                   className="block mt-5 mb-2 text-sm font-medium"
                 >
-                  Location <span className="text-red-600">*</span>
+                  District <span className="text-red-600">*</span>
+                </label>
+                <select
+                  {...register("district", { required: true })}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block h-14 w-full p-2.5"
+                  required
+                >
+                  {districtData?.map(
+                    (data: {
+                      id: number;
+                      districtTitle: string;
+                      value: string;
+                    }) => (
+                      <option key={data?.id} value={data?.value}>
+                        {data?.districtTitle}
+                      </option>
+                    )
+                  )}
+                </select>
+                {errors.district && (
+                  <span className="text-red-500 font-light">
+                    District is required
+                  </span>
+                )}
+
+                <label
+                  htmlFor="location"
+                  className="block mt-5 mb-2 text-sm font-medium"
+                >
+                  Address <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="text"
-                  {...register("location", { required: true })}
+                  {...register("address", { required: true })}
                   className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full h-14 p-2.5"
-                  placeholder="Type product name"
+                  placeholder="Type address"
                   required
                 />
-                {errors.location && (
+                {errors.address && (
                   <span className="text-red-500 font-light">
-                    Location is required
+                    Address is required
                   </span>
                 )}
                 <label
@@ -106,12 +137,32 @@ const CreatePost = () => {
                   type="text"
                   {...register("time", { required: true })}
                   className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full h-14 p-2.5"
-                  placeholder="Type product name"
+                  placeholder="10 p.m"
                   required
                 />
                 {errors.time && (
                   <span className="text-red-500 font-light">
                     Time is required
+                  </span>
+                )}
+              </div>
+              <div className="w-full">
+                <label
+                  htmlFor="contact"
+                  className="block mb-2 text-sm font-medium"
+                >
+                  No. of Bags <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="number"
+                  {...register("noOfBags", { required: true })}
+                  className="bg-gray-50 border border-gray-300 h-14 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                  placeholder="2"
+                  required
+                />
+                {errors.contact && (
+                  <span className="text-red-500 font-light">
+                    No of Bag is required
                   </span>
                 )}
               </div>
@@ -126,7 +177,7 @@ const CreatePost = () => {
                   type="text"
                   {...register("patientName", { required: true })}
                   className="bg-gray-50 border border-gray-300 h-14 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                  placeholder="Product brand"
+                  placeholder="Alex"
                   required
                 />
                 {errors.patientName && (
@@ -146,7 +197,7 @@ const CreatePost = () => {
                   type="number"
                   {...register("contact", { required: true })}
                   className="bg-gray-50 border border-gray-300 h-14 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                  placeholder="$2999"
+                  placeholder="012345678"
                   required
                 />
                 {errors.contact && (
@@ -155,6 +206,7 @@ const CreatePost = () => {
                   </span>
                 )}
               </div>
+
               <div className="sm:col-span-2">
                 <label
                   htmlFor="note"
@@ -182,4 +234,4 @@ const CreatePost = () => {
   );
 };
 
-export default CreatePost;
+export default withAuth(CreatePost);

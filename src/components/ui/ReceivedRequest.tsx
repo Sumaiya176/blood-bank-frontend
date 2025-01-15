@@ -5,11 +5,9 @@ import {
   useAddPostCancelHistoryMutation,
   useAddPostHistoryMutation,
 } from "@/redux/features/bloodPost/bloodPostApi";
-import {
-  useReceivedRequestQuery,
-  useStatusAcceptedMutation,
-} from "@/redux/features/donarRequest/donarRequestApi";
+import { useReceivedRequestQuery } from "@/redux/features/donarRequest/donarRequestApi";
 import { useAppSelector } from "@/redux/hooks";
+import withAuth from "@/utils/withAuth";
 import React from "react";
 import { toast } from "react-hot-toast";
 
@@ -18,11 +16,8 @@ const ReceivedRequest = () => {
   const { data } = useReceivedRequestQuery(user?.id);
   const [addPostBloodHistory] = useAddPostHistoryMutation();
   const [addPostCancelHistory] = useAddPostCancelHistoryMutation();
-  const [statusAccepted] = useStatusAcceptedMutation();
-  const [statusRejected] = useStatusAcceptedMutation();
 
-  const handleAcceptBtn = async (historyId: string, requestId: string) => {
-    console.log(requestId);
+  const handleAcceptBtn = async (historyId: string) => {
     const postId = {
       id: historyId,
     };
@@ -38,14 +33,13 @@ const ReceivedRequest = () => {
         toast.success(result.message);
       }
 
-      const updatedStatus = await statusAccepted(requestId).unwrap();
+      //const updatedStatus = await statusAccepted(requestId).unwrap();
     } catch (err) {
       console.log(err);
     }
   };
 
-  const handleRejectBtn = async (historyId: string, requestId: string) => {
-    console.log(requestId);
+  const handleRejectBtn = async (historyId: string) => {
     const postId = {
       id: historyId,
     };
@@ -61,12 +55,14 @@ const ReceivedRequest = () => {
         toast.success(result.message);
       }
 
-      const updatedStatus = await statusRejected(requestId).unwrap();
+      //const updatedStatus = await statusRejected(requestId).unwrap();
     } catch (err) {
       console.log(err);
     }
   };
-  console.log(data);
+
+  console.log(data?.data);
+
   return (
     <div>
       <div className="overflow-x-auto">
@@ -83,6 +79,7 @@ const ReceivedRequest = () => {
             </tr>
           </thead>
           <tbody>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {data?.data?.map((request: any, i: number) => {
               return (
                 <tr key={request?._id}>
@@ -106,18 +103,14 @@ const ReceivedRequest = () => {
                   </td>
                   <td className="flex justify-center items-center gap-2 text-center">
                     <button
-                      onClick={() =>
-                        handleAcceptBtn(request?.post?._id, request?._id)
-                      }
+                      onClick={() => handleAcceptBtn(request?.post?._id)}
                       className="btn btn-success text-white"
                     >
                       Accept
                     </button>
 
                     <button
-                      onClick={() =>
-                        handleRejectBtn(request?.post?._id, request?._id)
-                      }
+                      onClick={() => handleRejectBtn(request?.post?._id)}
                       className="btn btn-error text-white"
                     >
                       Reject
@@ -133,4 +126,4 @@ const ReceivedRequest = () => {
   );
 };
 
-export default ReceivedRequest;
+export default withAuth(ReceivedRequest);

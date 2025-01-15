@@ -12,7 +12,6 @@ const donarRequest = baseApi.injectEndpoints({
 
     receivedRequest: builder.query({
       query: (id) => {
-        console.log(id);
         return {
           url: `/request/received-request?userId=${id}`,
           method: "GET",
@@ -22,7 +21,6 @@ const donarRequest = baseApi.injectEndpoints({
 
     statusAccepted: builder.mutation({
       query: (id) => {
-        console.log(id);
         return {
           url: `/request/status-accepted?requestId=${id}`,
           method: "PATCH",
@@ -32,7 +30,6 @@ const donarRequest = baseApi.injectEndpoints({
 
     statusRejected: builder.mutation({
       query: (id) => {
-        console.log(id);
         return {
           url: `/request/status-accepted?requestId=${id}`,
           method: "PATCH",

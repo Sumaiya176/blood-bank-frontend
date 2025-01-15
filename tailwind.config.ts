@@ -17,7 +17,7 @@ module.exports = {
     },
   },
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  plugins: [require("daisyui")],
+  plugins: [require("daisyui"), require("flowbite-react")],
   // daisyui: {
   //   themes: ["valentine"],
   // },

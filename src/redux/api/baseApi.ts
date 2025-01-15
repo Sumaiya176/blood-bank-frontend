@@ -27,6 +27,7 @@ const baseQueryWithRefreshToken: BaseQueryFn<
   FetchArgs,
   BaseQueryApi,
   DefinitionType
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 > = async (args, api, extraOptions): Promise<any> => {
   let result = await baseQuery(args, api, extraOptions);
 
@@ -62,6 +63,7 @@ const baseQueryWithRefreshToken: BaseQueryFn<
 // Define a service using a base URL and expected endpoints
 export const baseApi = createApi({
   reducerPath: "baseApi",
+  // tagTypes: ["UserProfile"],
   baseQuery: baseQueryWithRefreshToken,
   endpoints: () => ({}),
 });

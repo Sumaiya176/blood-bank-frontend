@@ -2,9 +2,8 @@
 import { useActiveUsersQuery } from "@/redux/features/auth/userAuth";
 import React from "react";
 
-const ActiveAUsers = () => {
+const ActiveUsers = () => {
   const { data } = useActiveUsersQuery("");
-  console.log(data);
   return (
     <div>
       <div className="overflow-x-auto">
@@ -14,19 +13,20 @@ const ActiveAUsers = () => {
               <th>SI No.</th>
               <th>Name</th>
               <th>Email</th>
-              <th>Location</th>
+              <th>District</th>
               <th>Age</th>
               <th>Donated</th>
             </tr>
           </thead>
           <tbody>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {data?.data?.map((user: any, i: number) => {
               return (
                 <tr key={user?._id}>
                   <th>{i + 1}</th>
                   <td>{user?.name}</td>
                   <td>{user?.email}</td>
-                  <td>{user?.location}</td>
+                  <td>{user?.district}</td>
                   <td>{user?.age}</td>
                   <td>{user?.donationHistory.length}</td>
                 </tr>
@@ -39,4 +39,4 @@ const ActiveAUsers = () => {
   );
 };
 
-export default ActiveAUsers;
+export default ActiveUsers;

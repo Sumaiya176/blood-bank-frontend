@@ -1,10 +1,10 @@
-import ActiveUsers from "@/components/ui/ActiveUsers";
+import Connection from "@/components/ui/Connection";
 import React from "react";
 
 const page = () => {
   return (
     <div>
-      <ActiveUsers />
+      <Connection />
     </div>
   );
 };

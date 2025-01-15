@@ -1,10 +1,10 @@
-import ActiveUsers from "@/components/ui/ActiveUsers";
+import RequestedDonors from "@/components/ui/RequestedDonors";
 import React from "react";
 
 const page = () => {
   return (
     <div>
-      <ActiveUsers />
+      <RequestedDonors />
     </div>
   );
 };

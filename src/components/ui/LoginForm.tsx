@@ -1,10 +1,11 @@
 "use client";
 
-import { setUser } from "@/redux/features/auth/authSlice";
+import { setUser, useCurrentRoute } from "@/redux/features/auth/authSlice";
 import { useLoginMutation } from "@/redux/features/auth/userAuth";
-import { useAppDispatch } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { verifyToken } from "@/utils/verifyToken";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "react-hot-toast";
 
@@ -14,6 +15,8 @@ type Inputs = {
 };
 
 const LoginForm = () => {
+  const router = useRouter();
+  const pathname = useAppSelector(useCurrentRoute);
   const dispatch = useAppDispatch();
   const [login] = useLoginMutation();
   const {
@@ -26,34 +29,17 @@ const LoginForm = () => {
       const loginInfo = await login(data).unwrap();
       const user = verifyToken(loginInfo.data.accessToken);
       dispatch(setUser({ user, token: loginInfo.data.accessToken }));
-      console.log(loginInfo);
       if (loginInfo.success === false) {
         toast.error(loginInfo.errMessage);
       } else {
         toast.success(loginInfo.message);
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.log(err.message);
     }
-    // try {
-    //   const res = await fetch("http://localhost:5000/api/v1/auth/login", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(data),
-    //     cache: "no-store",
-    //   });
-    //   const loginInfo = await res.json();
-    //   if (loginInfo.success === false) {
-    //     toast.error(loginInfo.errMessage);
-    //   } else {
-    //     toast.success(loginInfo.message);
-    //   }
-    //   console.log(loginInfo);
-    // } catch (err: any) {
-    //   console.log(err.message);
-    // }
+
+    router.push(pathname as string);
   };
 
   return (

@@ -1,0 +1,182 @@
+"use client";
+
+import {
+  logout,
+  useCurrentToken,
+  useCurrentUser,
+} from "@/redux/features/auth/authSlice";
+import { useActiveUsersQuery } from "@/redux/features/auth/userAuth";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { IUser } from "@/types/userTypes";
+import Image from "next/image";
+//import Image from "next/image";
+import Link from "next/link";
+
+const NavigationBar = () => {
+  const dispatch = useAppDispatch();
+  const token = useAppSelector(useCurrentToken);
+  const currentUser = useAppSelector(useCurrentUser);
+  const { data: users } = useActiveUsersQuery("");
+
+  let myProfileData;
+  if (users) {
+    myProfileData = users?.data?.filter(
+      (user: IUser) => user.name === currentUser?.name
+    );
+  }
+
+  return (
+    <div>
+      <div className="navbar bg-base-100">
+        <div className="navbar-start">
+          <div className="dropdown">
+            <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h8m-8 6h16"
+                />
+              </svg>
+            </div>
+            <ul
+              tabIndex={0}
+              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+            >
+              <li>
+                <Link href="/dashboard">Dashboard</Link>
+              </li>
+              <li>
+                <Link href="/activeUsers">Active Users</Link>
+              </li>
+              <li>
+                <Link href="/createPost">Add Post</Link>
+              </li>
+              <li>
+                <Link href="/receivedRequest">Received Request</Link>
+              </li>
+            </ul>
+          </div>
+          <Link href="/" className="btn btn-ghost text-lg md:text-xl">
+            Blood Bank
+          </Link>
+        </div>
+        <div className="navbar-center hidden lg:flex">
+          <ul className="menu menu-horizontal px-1">
+            <li>
+              <Link href="/dashboard">Dashboard</Link>
+            </li>
+            <li>
+              <Link href="/activeUsers">Active Users</Link>
+            </li>
+            <li>
+              <Link href="/createPost">Add Post</Link>
+            </li>
+            <li>
+              <Link href="/receivedRequest">Received Request</Link>
+            </li>
+          </ul>
+        </div>
+        <div className="navbar-end">
+          <div
+            tabIndex={0}
+            role="button"
+            className="btn btn-ghost btn-circle me-4"
+          >
+            <div className="indicator">
+              <Image
+                src="/medal-reward.svg"
+                alt="Icon"
+                width={35}
+                height={35}
+              />
+              {/* <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg> */}
+              <span className="badge text-base badge-sm indicator-item text-red-600">
+                {myProfileData ? myProfileData[0]?.points : ""}
+              </span>
+            </div>
+          </div>
+
+          {token ? (
+            <div className="flex-none gap-2">
+              <div className="dropdown dropdown-end">
+                <div
+                  tabIndex={0}
+                  role="button"
+                  className="btn btn-ghost btn-circle avatar"
+                >
+                  <div className="w-10 rounded-full">
+                    <Image
+                      alt="Tailwind CSS Navbar component"
+                      src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                      width="10"
+                      height="10"
+                    />
+                  </div>
+                  <p>{currentUser?.name}</p>
+                </div>
+                <ul
+                  tabIndex={0}
+                  className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+                >
+                  <li>
+                    <Link href="/profile">Profile</Link>
+                  </li>
+                  <li>
+                    <Link href="/myPost">My Post</Link>
+                  </li>
+                  <li>
+                    <Link href="/myDonationHistory">My Donation History</Link>
+                  </li>
+                  <li>
+                    <Link href="/connection">Make Connection</Link>
+                  </li>
+                  <li>
+                    <p onClick={() => dispatch(logout())} className="btn">
+                      Logout
+                    </p>
+                    {/* {token ? (
+                    <p onClick={() => dispatch(logout())} className="btn">
+                      Logout
+                    </p>
+                  ) : (
+                    <Link href="/login" className="btn">
+                      Login
+                    </Link>
+                  )} */}
+                  </li>
+                </ul>
+              </div>
+            </div>
+          ) : (
+            <Link href="/login" className="btn">
+              Login
+            </Link>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default NavigationBar;
