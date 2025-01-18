@@ -2,15 +2,16 @@
 
 import { useGetBloodPostsQuery } from "@/redux/features/bloodPost/bloodPostApi";
 import { IBloodPost, IUser } from "@/types/userTypes";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { useAppSelector } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import {
   useCurrentUser,
   useCurrentToken,
+  removeRoute,
 } from "@/redux/features/auth/authSlice";
 import {
-  useActiveUsersQuery,
+  useAllUsersQuery,
   useConnectedUsersQuery,
 } from "@/redux/features/auth/userAuth";
 import { useSendRequestMutation } from "@/redux/features/donarRequest/donarRequestApi";
@@ -20,7 +21,7 @@ import { useRouter } from "next/navigation";
 const BloodPosts = () => {
   const user = useAppSelector(useCurrentUser);
   const token = useAppSelector(useCurrentToken);
-  const { data } = useGetBloodPostsQuery("");
+  const { data, refetch } = useGetBloodPostsQuery("");
   const { data: connectUser } = useConnectedUsersQuery("");
   //const [addPostBloodHistory] = useAddPostHistoryMutation();
   const [addRequest] = useSendRequestMutation();
@@ -29,9 +30,10 @@ const BloodPosts = () => {
   const [selectedReceiverValue, setSelectedReceiverValue] = useState("");
   // const [isDisable, setIsDisable] = useState(false);
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const currentUser = useAppSelector(useCurrentUser);
-  const { data: users } = useActiveUsersQuery("");
+  const { data: users } = useAllUsersQuery("");
 
   let myProfileData;
   if (users) {
@@ -43,6 +45,7 @@ const BloodPosts = () => {
   let posts = data?.data;
 
   if (token) {
+    console.log(posts);
     if (myProfileData) {
       posts = posts?.filter(
         (post: IBloodPost) => post?.district === myProfileData[0]?.district
@@ -106,6 +109,13 @@ const BloodPosts = () => {
     }
   };
 
+  console.log(posts);
+
+  useEffect(() => {
+    dispatch(removeRoute());
+    refetch();
+  });
+
   return (
     <div className="mb-14">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -128,7 +138,8 @@ const BloodPosts = () => {
               </p>
               <p className="text-gray-600">Name: {post?.patientName}</p>
               <p className="text-gray-600">
-                Needs {post?.noOfBags} Bags of blood
+                Need {post?.noOfBags} {post?.noOfBags === 1 ? "Bag" : "Bags"} of
+                blood
               </p>
               <p className="text-gray-600">Time: {post?.time}</p>
               <p className="text-gray-600">

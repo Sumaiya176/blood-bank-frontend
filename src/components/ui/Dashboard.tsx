@@ -16,7 +16,7 @@ const Dashboard = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (d: any) => d.status === "cancel"
   ).length;
-  //console.log(data?.data, donated, pending);
+
   return (
     <div>
       <p className="text-center pt-10 text-2xl font-medium">

@@ -96,7 +96,7 @@ const MyPost = () => {
   const handleRowClick = (row: Inputs) => {
     setSelectedRow(row);
     console.log(row);
-    reset(row); // Populate the form with selected row data
+    reset(row);
     setIsModalOpen(true);
   };
 
@@ -351,9 +351,10 @@ const MyPost = () => {
               left: "50%",
               transform: "translate(-50%, -50%)",
               background: "white",
-              padding: "20px",
+              padding: "30px",
               boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
               zIndex: 1000,
+              minWidth: "25%",
             }}
           >
             <form onSubmit={handleSubmit(onSubmit)}>
@@ -451,11 +452,16 @@ const MyPost = () => {
                 type="submit"
                 onClick={() => setPostId(selectedRow?.id)}
                 style={{ marginTop: "10px" }}
+                className="btn btn-success"
               >
                 Save
               </button>
             </form>
-            <button onClick={handleCloseModal} style={{ marginTop: "10px" }}>
+            <button
+              className="btn btn-secondary"
+              onClick={handleCloseModal}
+              style={{ marginTop: "10px" }}
+            >
               Close
             </button>
           </div>

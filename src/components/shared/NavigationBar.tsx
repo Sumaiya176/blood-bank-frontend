@@ -5,18 +5,19 @@ import {
   useCurrentToken,
   useCurrentUser,
 } from "@/redux/features/auth/authSlice";
-import { useActiveUsersQuery } from "@/redux/features/auth/userAuth";
+import { useAllUsersQuery } from "@/redux/features/auth/userAuth";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { IUser } from "@/types/userTypes";
 import Image from "next/image";
 //import Image from "next/image";
 import Link from "next/link";
+import { useEffect } from "react";
 
 const NavigationBar = () => {
   const dispatch = useAppDispatch();
   const token = useAppSelector(useCurrentToken);
   const currentUser = useAppSelector(useCurrentUser);
-  const { data: users } = useActiveUsersQuery("");
+  const { data: users, refetch } = useAllUsersQuery("");
 
   let myProfileData;
   if (users) {
@@ -24,6 +25,10 @@ const NavigationBar = () => {
       (user: IUser) => user.name === currentUser?.name
     );
   }
+
+  useEffect(() => {
+    refetch();
+  });
 
   return (
     <div>
@@ -97,20 +102,6 @@ const NavigationBar = () => {
                 width={35}
                 height={35}
               />
-              {/* <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg> */}
               <span className="badge text-base badge-sm indicator-item text-red-600">
                 {myProfileData ? myProfileData[0]?.points : ""}
               </span>
@@ -125,7 +116,13 @@ const NavigationBar = () => {
                   role="button"
                   className="btn btn-ghost btn-circle avatar"
                 >
-                  <div className="w-10 rounded-full">
+                  <div
+                    className={`w-10 border-4 ${
+                      myProfileData && myProfileData[0]?.donationAvailability
+                        ? "border-green-600"
+                        : "border-red-600"
+                    }  rounded-full`}
+                  >
                     <Image
                       alt="Tailwind CSS Navbar component"
                       src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"

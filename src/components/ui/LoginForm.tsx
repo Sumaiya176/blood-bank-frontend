@@ -39,7 +39,7 @@ const LoginForm = () => {
       console.log(err.message);
     }
 
-    router.push(pathname as string);
+    router.push(pathname || "/");
   };
 
   return (

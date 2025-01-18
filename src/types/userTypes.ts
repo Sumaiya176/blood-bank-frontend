@@ -20,5 +20,5 @@ export interface IBloodPost {
   donar: string;
   postCreator: string;
   createdAt: string;
-  noOfBags: string;
+  noOfBags: number;
 }
