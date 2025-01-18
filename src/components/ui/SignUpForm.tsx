@@ -43,7 +43,7 @@ const SignUpForm = () => {
   const userNameSimilarityChecking = async (data: string) => {
     try {
       const res = await fetch(
-        "http://localhost:5000/api/v1/auth/similar-username-checking",
+        "https://blood-bank-sable.vercel.app/api/v1/auth/similar-username-checking",
         {
           method: "POST",
           headers: {
