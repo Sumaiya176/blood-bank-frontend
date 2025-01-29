@@ -6,7 +6,7 @@ export const userSignUp = async (user: IUser) => {
   const data = { user };
   console.log("data in action file", data, JSON.stringify(data));
   const res = await fetch(
-    "https://blood-bank-sable.vercel.app/api/v1/users/user-registration",
+    "https://server-blood-bank.vercel.app/api/v1/users/user-registration",
     {
       method: "POST",
       headers: {

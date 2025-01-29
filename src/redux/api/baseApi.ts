@@ -10,7 +10,7 @@ import { RootState } from "../store";
 import { logout, setUser } from "../features/auth/authSlice";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://blood-bank-sable.vercel.app/api/v1",
+  baseUrl: "https://server-blood-bank.vercel.app/api/v1",
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.token;
@@ -35,7 +35,7 @@ const baseQueryWithRefreshToken: BaseQueryFn<
     console.log("sending refresh token");
 
     const res = await fetch(
-      "https://blood-bank-sable.vercel.app/api/v1/auth/refresh-token",
+      "https://server-blood-bank.vercel.app/api/v1/auth/refresh-token",
       {
         method: "POST",
         credentials: "include",
