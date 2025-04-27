@@ -34,7 +34,7 @@ const SignUpForm = () => {
         toast.success(userInfo.message);
       }
     } catch (err) {
-      console.error("Registration error", err);
+      console.log("Registration error", err);
     }
   };
 

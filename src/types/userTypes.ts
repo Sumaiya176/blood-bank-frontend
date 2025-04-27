@@ -22,3 +22,6 @@ export interface IBloodPost {
   createdAt: string;
   noOfBags: number;
 }
+export interface IBloodPostData {
+  data: IBloodPost;
+}

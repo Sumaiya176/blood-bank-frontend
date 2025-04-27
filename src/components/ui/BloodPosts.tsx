@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 const BloodPosts = () => {
   const user = useAppSelector(useCurrentUser);
   const token = useAppSelector(useCurrentToken);
-  const { data, refetch } = useGetBloodPostsQuery("");
+  const { data, refetch } = useGetBloodPostsQuery();
   const { data: connectUser } = useConnectedUsersQuery("");
   //const [addPostBloodHistory] = useAddPostHistoryMutation();
   const [addRequest] = useSendRequestMutation();
@@ -42,6 +42,7 @@ const BloodPosts = () => {
     );
   }
 
+  console.log(data);
   let posts = data?.data;
 
   if (token) {
@@ -111,10 +112,9 @@ const BloodPosts = () => {
 
   console.log(posts);
 
-  useEffect(() => {
-    dispatch(removeRoute());
-    refetch();
-  });
+  // useEffect(() => {
+  //   dispatch(removeRoute());
+  // }, []);
 
   return (
     <div className="mb-14">

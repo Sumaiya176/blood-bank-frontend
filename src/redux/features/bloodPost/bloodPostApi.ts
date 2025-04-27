@@ -1,16 +1,13 @@
 import { baseApi } from "@/redux/api/baseApi";
+import { IBloodPostData } from "@/types/userTypes";
 
 const bloodPostApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getBloodPosts: builder.query({
-      query: () => {
-        const request = {
-          url: "/blood-posts",
-          method: "GET",
-        };
-
-        return request;
-      },
+    getBloodPosts: builder.query<IBloodPostData[], void>({
+      query: () => ({
+        url: "/blood-posts",
+        method: "GET",
+      }),
     }),
 
     createBloodPost: builder.mutation({
