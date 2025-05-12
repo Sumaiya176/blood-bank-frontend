@@ -1,4 +1,4 @@
-import BloodPosts from "@/components/ui/BloodPosts";
+import BloodPosts from "@/components/ui/Home/BloodPosts";
 import React from "react";
 
 const BloodPostPage = () => {

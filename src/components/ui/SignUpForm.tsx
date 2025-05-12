@@ -6,6 +6,9 @@ import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useRegistrationMutation } from "@/redux/features/auth/userAuth";
 import { districtData } from "@/utils/districtData";
+import { useRouter } from "next/navigation";
+import { useAppSelector } from "@/redux/hooks";
+import { useCurrentRoute } from "@/redux/features/auth/authSlice";
 type Inputs = {
   name: string;
   email: string;
@@ -18,6 +21,8 @@ type Inputs = {
 const SignUpForm = () => {
   const [warningMessage, setWarningMessage] = useState("");
   const [registration] = useRegistrationMutation();
+  const pathname = useAppSelector(useCurrentRoute);
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -28,10 +33,12 @@ const SignUpForm = () => {
     const data = { user };
     try {
       const userInfo = await registration(data).unwrap();
+      console.log(userInfo);
       if (userInfo.success === false) {
-        toast.error(userInfo.errMessage);
+        toast.error(userInfo.message);
       } else {
         toast.success(userInfo.message);
+        router.push(pathname || "/");
       }
     } catch (err) {
       console.log("Registration error", err);
@@ -72,23 +79,23 @@ const SignUpForm = () => {
     longitude: number;
   } | null>(null);
 
-  const getUserLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
+  // const getUserLocation = () => {
+  //   if (navigator.geolocation) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       (position) => {
+  //         const { latitude, longitude } = position.coords;
 
-          setUserLocation({ latitude, longitude });
-        },
+  //         setUserLocation({ latitude, longitude });
+  //       },
 
-        (error) => {
-          console.error("Error get user location: ", error);
-        }
-      );
-    } else {
-      console.log("Geolocation is not supported by this browser");
-    }
-  };
+  //       (error) => {
+  //         console.error("Error get user location: ", error);
+  //       }
+  //     );
+  //   } else {
+  //     console.log("Geolocation is not supported by this browser");
+  //   }
+  // };
 
   useEffect(() => {
     if (userName?.length < 3) {
@@ -207,7 +214,7 @@ const SignUpForm = () => {
           <input
             className="block w-full btn font-semibold btn-success text-white"
             type="submit"
-            onClick={() => getUserLocation()}
+            //onClick={() => getUserLocation()}
           />
         </div>
 

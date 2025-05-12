@@ -25,10 +25,13 @@ const LoginForm = () => {
     formState: { errors },
   } = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    console.log(data);
     try {
       const loginInfo = await login(data).unwrap();
+      console.log(loginInfo);
       const user = verifyToken(loginInfo.data.accessToken);
       dispatch(setUser({ user, token: loginInfo.data.accessToken }));
+
       if (loginInfo.success === false) {
         toast.error(loginInfo.errMessage);
       } else {

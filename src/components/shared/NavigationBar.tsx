@@ -31,7 +31,7 @@ const NavigationBar = () => {
   });
 
   return (
-    <div>
+    <div className="sticky top-0 z-10 pb-4">
       <div className="navbar bg-base-100">
         <div className="navbar-start">
           <div className="dropdown">
@@ -59,6 +59,9 @@ const NavigationBar = () => {
                 <Link href="/dashboard">Dashboard</Link>
               </li>
               <li>
+                <Link href="/allPosts">All Posts</Link>
+              </li>
+              <li>
                 <Link href="/activeUsers">Active Users</Link>
               </li>
               <li>
@@ -77,6 +80,9 @@ const NavigationBar = () => {
           <ul className="menu menu-horizontal px-1">
             <li>
               <Link href="/dashboard">Dashboard</Link>
+            </li>
+            <li>
+              <Link href="/allPosts">All Posts</Link>
             </li>
             <li>
               <Link href="/activeUsers">Active Users</Link>
@@ -109,28 +115,25 @@ const NavigationBar = () => {
           </div>
 
           {token ? (
-            <div className="flex-none gap-2">
+            <div className="flex-none">
               <div className="dropdown dropdown-end">
                 <div
                   tabIndex={0}
                   role="button"
                   className="btn btn-ghost btn-circle avatar"
                 >
-                  <div
-                    className={`w-10 border-4 ${
+                  <Image
+                    className={` border-4 ${
                       myProfileData && myProfileData[0]?.donationAvailability
                         ? "border-green-600"
                         : "border-red-600"
                     }  rounded-full`}
-                  >
-                    <Image
-                      alt="Tailwind CSS Navbar component"
-                      src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-                      width="10"
-                      height="10"
-                    />
-                  </div>
-                  <p>{currentUser?.name}</p>
+                    alt="Tailwind CSS Navbar component"
+                    src="/gigi.jpg"
+                    width="20"
+                    height="20"
+                  />
+                  <p className="mt-[-7px]">{currentUser?.name}</p>
                 </div>
                 <ul
                   tabIndex={0}

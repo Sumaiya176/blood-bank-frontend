@@ -1,18 +1,19 @@
 "use client";
 
 //import Image from "next/image";
-import { useCurrentUser } from "@/redux/features/auth/authSlice";
+import { removeRoute, useCurrentUser } from "@/redux/features/auth/authSlice";
 import {
   useAllUsersQuery,
   useUpdateUserMutation,
 } from "@/redux/features/auth/userAuth";
-import { useAppSelector } from "@/redux/hooks";
+import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { IUser } from "@/types/userTypes";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "react-hot-toast";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { districtData } from "@/utils/districtData";
 import withAuth from "@/utils/withAuth";
+
 type Inputs = {
   name: string;
   email: string;
@@ -20,13 +21,15 @@ type Inputs = {
   age: number;
   district: string;
   donationAvailability: string;
+  bloodGroup: string;
 };
 
 const Profile = () => {
   const currentUser = useAppSelector(useCurrentUser);
-  const { data: users, isError, refetch } = useAllUsersQuery("");
+  const { data: users, isError, refetch } = useAllUsersQuery(undefined);
   const [updateUser] = useUpdateUserMutation();
   const [userId, setUserId] = useState("");
+  const dispatch = useAppDispatch();
 
   let myProfileData = [];
   if (users) {
@@ -34,6 +37,7 @@ const Profile = () => {
       (user: IUser) => user.name === currentUser?.name
     );
   }
+  console.log(users, myProfileData, currentUser);
 
   const {
     register,
@@ -66,6 +70,10 @@ const Profile = () => {
 
     console.log(isError, myProfileData);
   };
+
+  useEffect(() => {
+    dispatch(removeRoute());
+  }, [dispatch]);
 
   return (
     <div className="mx-1 md:mx-32 my-16 bg-lime-100 rounded">
@@ -104,6 +112,10 @@ const Profile = () => {
                     <span className="text-red-600">Inactive</span>
                   )}
                 </p>
+              </div>
+              <div className="md:flex space-x-4 mb-4">
+                <p className="p-2">Blood Group</p>
+                <p className="py-2 px-6 rounded bg-white">{user?.bloodGroup}</p>
               </div>
               <div className="text-center mt-12">
                 <button
@@ -200,6 +212,29 @@ const Profile = () => {
                         {errors.district && (
                           <span className="text-red-500 text-sm">
                             District is required
+                          </span>
+                        )}
+                        <p className="text-start">
+                          Blood Group <span className="text-red-600">*</span>
+                        </p>
+                        <select
+                          defaultValue={user?.bloodGroup}
+                          {...register("bloodGroup", { required: true })}
+                          className="block input input-bordered input-warning w-full max-w-xs"
+                          required
+                        >
+                          <option value="A+">A+</option>
+                          <option value="A-">A-</option>
+                          <option value="B+">B+</option>
+                          <option value="B-">B-</option>
+                          <option value="AB+">AB+</option>
+                          <option value="AB-">AB-</option>
+                          <option value="O+">O+</option>
+                          <option value="O-">O-</option>
+                        </select>
+                        {errors.bloodGroup && (
+                          <span className="text-red-500 text-sm">
+                            Blood Group is required
                           </span>
                         )}
                         <p className="text-start">

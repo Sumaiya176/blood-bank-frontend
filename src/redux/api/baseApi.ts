@@ -66,7 +66,14 @@ const baseQueryWithRefreshToken: BaseQueryFn<
 // Define a service using a base URL and expected endpoints
 export const baseApi = createApi({
   reducerPath: "baseApi",
-  // tagTypes: ["UserProfile"],
+  tagTypes: [
+    "UserProfile",
+    "BloodPost",
+    "UserConnection",
+    "RequestedDonor",
+    "MyPost",
+    "Request",
+  ],
   baseQuery: baseQueryWithRefreshToken,
   endpoints: () => ({}),
 });

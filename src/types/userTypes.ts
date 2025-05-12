@@ -4,7 +4,7 @@ export interface IUser {
   email: string;
   password: string;
   age: number;
-  location: string;
+  district: string;
   bloodGroup: string;
 }
 

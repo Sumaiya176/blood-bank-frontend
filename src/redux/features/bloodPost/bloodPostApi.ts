@@ -1,13 +1,13 @@
 import { baseApi } from "@/redux/api/baseApi";
-import { IBloodPostData } from "@/types/userTypes";
 
 const bloodPostApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getBloodPosts: builder.query<IBloodPostData[], void>({
+    getBloodPosts: builder.query({
       query: () => ({
         url: "/blood-posts",
         method: "GET",
       }),
+      providesTags: ["BloodPost"],
     }),
 
     createBloodPost: builder.mutation({
@@ -18,12 +18,13 @@ const bloodPostApi = baseApi.injectEndpoints({
           body: postData,
         };
       },
+      invalidatesTags: ["BloodPost", "MyPost"],
     }),
 
     addPostHistory: builder.mutation({
-      query: ({ id, info }) => {
+      query: ({ userId, info }) => {
         return {
-          url: `/blood-posts/create-donation-history/${id}`,
+          url: `/blood-posts/create-donation-history/${userId}`,
           method: "PATCH",
           body: info,
         };
@@ -31,11 +32,12 @@ const bloodPostApi = baseApi.injectEndpoints({
     }),
 
     addPostCancelHistory: builder.mutation({
-      query: ({ id, info }) => {
+      query: ({ userId, requestId }) => {
+        console.log(requestId);
         return {
-          url: `/blood-posts/create-donation-cancel-history/${id}`,
+          url: `/blood-posts/create-donation-cancel-history/${userId}`,
           method: "PATCH",
-          body: info,
+          body: requestId,
         };
       },
     }),
@@ -57,16 +59,19 @@ const bloodPostApi = baseApi.injectEndpoints({
           method: "DELETE",
         };
       },
+      invalidatesTags: ["MyPost"],
     }),
 
     updatePostStatus: builder.mutation({
       query: ({ id, status }) => {
+        console.log(id, status);
         return {
           url: `/blood-posts/update-post-status/${id}`,
           method: "PATCH",
           body: status,
         };
       },
+      invalidatesTags: ["MyPost"],
     }),
 
     singlePost: builder.query({
@@ -78,14 +83,15 @@ const bloodPostApi = baseApi.injectEndpoints({
       },
     }),
 
-    cancelRequestedDonor: builder.mutation({
-      query: ({ postId, donorId }) => {
+    changeDonarRequestStatus: builder.mutation({
+      query: ({ status, requestId }) => {
         return {
-          url: `/blood-posts/cancel-requested-donor/${postId}`,
+          url: `/request/change-request-status/${requestId}`,
           method: "PATCH",
-          body: { donorId },
+          body: { status },
         };
       },
+      invalidatesTags: ["RequestedDonor", "Request"],
     }),
 
     dueRequestedDonor: builder.mutation({
@@ -118,7 +124,7 @@ export const {
   useDeleteBloodPostMutation,
   useUpdatePostStatusMutation,
   useSinglePostQuery,
-  useCancelRequestedDonorMutation,
+  useChangeDonarRequestStatusMutation,
   useDueRequestedDonorMutation,
   useDonatedRequestedDonorMutation,
 } = bloodPostApi;

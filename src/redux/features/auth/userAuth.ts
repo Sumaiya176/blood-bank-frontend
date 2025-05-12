@@ -30,8 +30,12 @@ const authApi = baseApi.injectEndpoints({
         url: `/users/all-users`,
         method: "GET",
       }),
-      // providesTags: ["UserProfile"],
+      providesTags: ["UserProfile"],
     }),
+
+    // allUsers: builder.query({
+    //   query: () => `/users/all-users`,
+    // }),
 
     updateUser: builder.mutation({
       query: ({ id, user }) => ({
@@ -39,7 +43,7 @@ const authApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: user,
       }),
-      // invalidatesTags: ["UserProfile"],
+      invalidatesTags: ["UserProfile"],
     }),
 
     getMyPosts: builder.query({
@@ -47,6 +51,7 @@ const authApi = baseApi.injectEndpoints({
         url: `/users/my-posts`,
         method: "GET",
       }),
+      providesTags: ["MyPost"],
     }),
 
     getMyDonationHistory: builder.query({
@@ -63,16 +68,22 @@ const authApi = baseApi.injectEndpoints({
           method: "PATCH",
         };
       },
+      invalidatesTags: ["UserConnection"],
     }),
 
     connectedUsers: builder.query({
-      query: () => {
-        return {
-          url: `/users/connected-users`,
-          method: "GET",
-        };
-      },
+      query: () => ({
+        url: `/users/connected-users`,
+        method: "GET",
+      }),
+      providesTags: ["UserConnection"],
     }),
+    // connectedUsers: builder.query({
+    //   query: () => {(
+    //       url: `/users/connected-users`,
+    //       method: "GET",
+    //   )},
+    // }),
 
     pointReduction: builder.mutation({
       query: ({ postId, name, userId }) => {
@@ -90,6 +101,7 @@ const authApi = baseApi.injectEndpoints({
           method: "GET",
         };
       },
+      providesTags: ["RequestedDonor"],
     }),
   }),
 });

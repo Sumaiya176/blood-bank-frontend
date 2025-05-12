@@ -15,11 +15,21 @@ import React from "react";
 import { toast } from "react-hot-toast";
 
 const Connection = () => {
-  const { data } = useAllUsersQuery("");
-  const { data: myFriends } = useConnectedUsersQuery("");
+  //const { data } = useAllUsersQuery("");
+  const { data: users } = useAllUsersQuery(undefined);
+  const { data } = useConnectedUsersQuery("");
   const user = useAppSelector(useCurrentUser);
-  const connectionUsers = data?.data?.filter(
+  const connectionUsers = users?.data?.filter(
     (connectUser: IUser) => connectUser.name !== user?.name
+  );
+
+  const usersToRemove: string[] = [];
+  data?.data[0]?.friends.forEach((item: IUser) => {
+    usersToRemove.push(item?.name);
+  });
+
+  const connectionUsersWithoutFriends = connectionUsers?.filter(
+    (item: IUser) => !usersToRemove.includes(item?.name)
   );
   const [makeConnection] = useMakeConnectionMutation();
 
@@ -33,41 +43,50 @@ const Connection = () => {
   };
 
   return (
-    <div>
-      <p>My Friends</p>
+    <div className="my-10">
+      <p className="text-2xl font-semibold">My Friends</p>
       <div className="grid grid-cols-2 md:grid-cols-6 lg:grid-cols-8">
-        {myFriends?.data[0]?.friends?.map((user: IUser) => (
-          <div className="m-4 p-2 border" key={user?._id}>
+        {data?.data[0]?.friends?.map((user: IUser, i: number) => (
+          <div
+            className="m-4 flex justify-center flex-col items-center"
+            key={i}
+          >
             <Image
               alt="user"
-              src="https://cdn-icons-png.flaticon.com/512/21/21104.png"
+              src="/gigi-hadid.jpg"
+              className="object-cover rounded-full"
               width="90"
               height="90"
             />
-            <p>{user?.name}</p>
+            <p className="font-semibold text-gray-500 my-2">{user?.name}</p>
             <button
-              onClick={() => handleConnect(user?._id)}
+              //onClick={() => handleConnect(user?._id)}
               className="bg-green-500 p-1 text-sm text-white  rounded"
             >
-              Connect
+              Connected
             </button>
           </div>
         ))}
       </div>
-      <p>Make Connections</p>
-      <div className="flex">
-        {connectionUsers?.map((user: IUser) => (
-          <div className="m-4 p-2 border" key={user?._id}>
+      <hr className="my-10" />
+      <p className="text-2xl font-semibold">Make Connections</p>
+      <div className="grid grid-cols-2 md:grid-cols-6 lg:grid-cols-8">
+        {connectionUsersWithoutFriends?.map((user: IUser) => (
+          <div
+            className="m-4 flex justify-center flex-col items-center"
+            key={user?._id}
+          >
             <Image
               alt="user"
-              src="https://cdn-icons-png.flaticon.com/512/21/21104.png"
+              src="/gigi.jpg"
+              className="object-cover rounded-full"
               width="90"
               height="90"
             />
-            <p>{user?.name}</p>
+            <p className="font-semibold text-gray-500 my-2">{user?.name}</p>
             <button
               onClick={() => handleConnect(user?._id)}
-              className="bg-green-500 p-1 text-sm text-white  rounded"
+              className="bg-red-500 p-1 text-sm text-white  rounded"
             >
               Connect
             </button>

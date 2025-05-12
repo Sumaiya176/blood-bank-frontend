@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import {
-  useAddPostHistoryMutation,
+  //useAddPostHistoryMutation,
   useSinglePostQuery,
 } from "@/redux/features/bloodPost/bloodPostApi";
 //import { formatDistanceToNow } from "date-fns";
@@ -14,30 +14,51 @@ import { usePointReductionMutation } from "@/redux/features/auth/userAuth";
 import { formatDistanceToNow } from "date-fns";
 import { IBloodPost } from "@/types/userTypes";
 import withAuth from "@/utils/withAuth";
+import { useSendRequestMutation } from "@/redux/features/donarRequest/donarRequestApi";
 
 const PostDetails = () => {
   const params = useParams<{ postId: string }>();
   const { data } = useSinglePostQuery(params?.postId);
-  const [addPostBloodHistory] = useAddPostHistoryMutation();
+  //const [addPostBloodHistory] = useAddPostHistoryMutation();
+  const [addRequest] = useSendRequestMutation();
   const [pointReduction] = usePointReductionMutation();
   const user = useAppSelector(useCurrentUser);
   const [numberType, setNumberType] = useState<boolean>(false);
   const singlePost = data?.data;
 
   const handleAddPostHistory = async (historyId: string) => {
-    const postId = {
-      id: historyId,
+    // const postId = {
+    //   id: historyId,
+    // };
+    // const info = {
+    //   postId,
+    // };
+    // try {
+    //   const id = user?.id;
+    //   const result = await addPostBloodHistory({ id, info }).unwrap();
+    //   if (result.success === false) {
+    //     toast.error(result.errMessage);
+    //   } else {
+    //     toast.success(result.message);
+    //   }
+    // } catch (err) {
+    //   console.log(err);
+    // }
+
+    const request = {
+      post: historyId,
+      receiver: user?.id,
+      sender: user?.id,
+      status: "accepted",
     };
-    const info = {
-      postId,
-    };
+
+    const requestData = { request };
     try {
-      const id = user?.id;
-      const result = await addPostBloodHistory({ id, info }).unwrap();
-      if (result.success === false) {
-        toast.error(result.errMessage);
+      const requestInfo = await addRequest(requestData).unwrap();
+      if (requestInfo.success === false) {
+        toast.error(requestInfo.errMessage);
       } else {
-        toast.success(result.message);
+        toast.success(requestInfo.message);
       }
     } catch (err) {
       console.log(err);
@@ -147,7 +168,7 @@ const PostDetails = () => {
                 onClick={() => handleAddPostHistory(singlePost?._id)}
                 className="bg-green-600 text-white rounded p-3"
               >
-                Donate
+                Send Request
               </button>
             </div>
           </div>

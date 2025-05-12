@@ -33,6 +33,7 @@ const MyPost = () => {
   const [selectedRow, setSelectedRow] = useState<Inputs>();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  console.log(data?.data?.postHistory);
   const {
     register,
     handleSubmit,
@@ -73,14 +74,14 @@ const MyPost = () => {
     }
   };
 
-  const handleUpdateStatus = async (
+  const handleUpdatePostStatus = async (
     e: React.ChangeEvent<HTMLSelectElement>,
     id: string
   ) => {
-    const value = (e.target as HTMLSelectElement).value;
+    const status = (e.target as HTMLSelectElement).value;
 
     try {
-      const result = await updatePostStatus({ id, status: value }).unwrap();
+      const result = await updatePostStatus({ id, status }).unwrap();
       if (result.success === false) {
         toast.error(result.errMessage);
       } else {
@@ -140,11 +141,23 @@ const MyPost = () => {
                   <td className="text-center">{post?.time}</td>
                   <td className="text-center">{post?.noOfBags}</td>
                   <td className="text-center">{post?.contact}</td>
-                  <td className="text-center">{post?.status}</td>
+                  <td className="text-center ">
+                    <p
+                      className={`p-3 rounded text-white ${
+                        post?.status === "pending"
+                          ? "bg-red-500"
+                          : post?.status === "due"
+                          ? "bg-orange-500"
+                          : "bg-green-500"
+                      }`}
+                    >
+                      {post?.status}
+                    </p>
+                  </td>
                   <td className="text-center">
                     <select
                       className="border text-center border-slate-300 p-3 rounded"
-                      onChange={(e) => handleUpdateStatus(e, post?._id)}
+                      onChange={(e) => handleUpdatePostStatus(e, post?._id)}
                     >
                       <option value="pending">Pending</option>
                       <option value="donated">Donated</option>
@@ -175,158 +188,6 @@ const MyPost = () => {
                     >
                       Edit
                     </button>
-                    {/* {
-                      <dialog
-                        id="my_modal_5"
-                        className="modal modal-bottom sm:modal-middle"
-                      >
-                        <div className="modal-box">
-                          <form onSubmit={handleSubmit(onSubmit)}>
-                            <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
-                              <div className="sm:col-span-2">
-                                <label
-                                  htmlFor="name"
-                                  className="block mb-2 text-sm font-medium"
-                                >
-                                  Blood Group{" "}
-                                  <span className="text-red-600">*</span>
-                                </label>
-                                <select
-                                  {...register("bloodGroup", {
-                                    required: true,
-                                  })}
-                                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block h-14 w-full p-2.5"
-                                  defaultValue={post?.bloodGroup}
-                                  required
-                                >
-                                  <option value="A+">A+</option>
-                                  <option value="A-">A-</option>
-                                  <option value="B+">B+</option>
-                                  <option value="B-">B-</option>
-                                  <option value="AB+">AB+</option>
-                                  <option value="AB-">AB-</option>
-                                  <option value="O+">O+</option>
-                                  <option value="O-">O-</option>
-                                </select>
-
-                                <label
-                                  htmlFor="location"
-                                  className="block mt-5 mb-2 text-sm font-medium"
-                                >
-                                  Location{" "}
-                                  <span className="text-red-600">*</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  {...register("address", { required: true })}
-                                  className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full h-14 p-2.5"
-                                  defaultValue={post?.address}
-                                  required
-                                />
-
-                                <label
-                                  htmlFor="time"
-                                  className="block mt-5 mb-2 text-sm font-medium"
-                                >
-                                  Time <span className="text-red-600">*</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  {...register("time", { required: true })}
-                                  className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full h-14 p-2.5"
-                                  defaultValue={post?.time}
-                                  required
-                                />
-                              </div>
-                              <div className="w-full">
-                                <label
-                                  htmlFor="contact"
-                                  className="block mb-2 text-sm font-medium"
-                                >
-                                  No. of Bags{" "}
-                                  <span className="text-red-600">*</span>
-                                </label>
-                                <input
-                                  type="number"
-                                  {...register("noOfBags", { required: true })}
-                                  className="bg-gray-50 border border-gray-300 h-14 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                                  defaultValue={post?.noOfBags}
-                                  required
-                                />
-                                {errors.contact && (
-                                  <span className="text-red-500 font-light">
-                                    No of Bag is required
-                                  </span>
-                                )}
-                              </div>
-                              <div className="w-full">
-                                <label
-                                  htmlFor="patientName"
-                                  className="block mb-2 text-sm font-medium text-gray-900"
-                                >
-                                  Patient Name{" "}
-                                  <span className="text-red-600">*</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  {...register("patientName", {
-                                    required: true,
-                                  })}
-                                  className="bg-gray-50 border border-gray-300 h-14 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                                  defaultValue={post?.patientName}
-                                  required
-                                />
-                              </div>
-                              <div className="w-full">
-                                <label
-                                  htmlFor="contact"
-                                  className="block mb-2 text-sm font-medium"
-                                >
-                                  Contact No.{" "}
-                                  <span className="text-red-600">*</span>
-                                </label>
-                                <input
-                                  type="number"
-                                  className="bg-gray-50 border border-gray-300 h-14 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                                  defaultValue={post?.contact}
-                                  {...register("contact", { required: true })}
-                                  required
-                                />
-                              </div>
-
-                              <div className="sm:col-span-2">
-                                <label
-                                  htmlFor="note"
-                                  className="block mb-2 text-sm font-medium text-gray-900"
-                                >
-                                  Note
-                                </label>
-                                <textarea
-                                  id="note"
-                                  className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500"
-                                  defaultValue={post?.note}
-                                ></textarea>
-                              </div>
-                            </div>
-
-                            <button
-                              type="submit"
-                              className="inline-flex items-center bg-blue-600 text-white px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 hover:bg-primary-800"
-                              onClick={() => setPostId(post?._id)}
-                            >
-                              Edit post
-                            </button>
-                          </form>
-                          <div className="modal-action">
-                            <form method="dialog">
-                              <button className="btn bg-red-500 text-white">
-                                Close
-                              </button>
-                            </form>
-                          </div>
-                        </div>
-                      </dialog>
-                    } */}
                   </td>
                   <td
                     className="text-center"

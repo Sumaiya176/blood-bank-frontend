@@ -1,92 +1,100 @@
 "use client";
 
-import { useGetBloodPostsQuery } from "@/redux/features/bloodPost/bloodPostApi";
-import { IBloodPost, IUser } from "@/types/userTypes";
-import React, { useEffect, useState } from "react";
-import { formatDistanceToNow } from "date-fns";
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import {
-  useCurrentUser,
-  useCurrentToken,
   removeRoute,
+  useCurrentToken,
+  useCurrentUser,
 } from "@/redux/features/auth/authSlice";
 import {
   useAllUsersQuery,
   useConnectedUsersQuery,
 } from "@/redux/features/auth/userAuth";
+import {
+  useAddPostHistoryMutation,
+  useGetBloodPostsQuery,
+} from "@/redux/features/bloodPost/bloodPostApi";
 import { useSendRequestMutation } from "@/redux/features/donarRequest/donarRequestApi";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { IBloodPost, IUser } from "@/types/userTypes";
+import { formatDistanceToNow } from "date-fns";
+import { SetStateAction, useEffect, useMemo, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 const BloodPosts = () => {
-  const user = useAppSelector(useCurrentUser);
-  const token = useAppSelector(useCurrentToken);
-  const { data, refetch } = useGetBloodPostsQuery();
-  const { data: connectUser } = useConnectedUsersQuery("");
-  //const [addPostBloodHistory] = useAddPostHistoryMutation();
-  const [addRequest] = useSendRequestMutation();
-  //const { data: activeUsers } = useActiveUsersQuery("");
   const [selectedPostValue, setSelectedPostValue] = useState("");
   const [selectedReceiverValue, setSelectedReceiverValue] = useState("");
-  // const [isDisable, setIsDisable] = useState(false);
-  const router = useRouter();
-  const dispatch = useAppDispatch();
-
+  const user = useAppSelector(useCurrentUser);
+  const token = useAppSelector(useCurrentToken);
+  const { data } = useGetBloodPostsQuery("");
+  const { data: connectUser } = useConnectedUsersQuery("");
+  const [addRequest] = useSendRequestMutation();
+  const [addDonationHistory] = useAddPostHistoryMutation();
+  const { data: users } = useAllUsersQuery(undefined);
   const currentUser = useAppSelector(useCurrentUser);
-  const { data: users } = useAllUsersQuery("");
+  const dispatch = useAppDispatch();
+  const router = useRouter();
 
-  let myProfileData;
-  if (users) {
-    myProfileData = users?.data?.filter(
-      (user: IUser) => user.name === currentUser?.name
-    );
-  }
+  //Helper function to determine compatible blood groups
+  const getCompatibleBloodGroups = (bloodGroup: string) => {
+    switch (bloodGroup) {
+      case "AB+":
+        return ["AB+"];
+      case "A+":
+        return ["A+", "AB+"];
+      case "B+":
+        return ["B+", "AB+"];
+      case "O+":
+        return ["O+", "A+", "B+", "AB+"];
+      case "A-":
+        return ["A-", "A+", "AB+", "AB-"];
+      case "B-":
+        return ["B-", "B+", "AB+", "AB-"];
+      case "AB-":
+        return ["AB+", "AB-"];
+      default:
+        return null;
+    }
+  };
 
-  console.log(data);
-  let posts = data?.data;
+  //Memoize filtered posts
+  const posts = useMemo(() => {
+    console.log(data?.data);
 
-  if (token) {
-    console.log(posts);
-    if (myProfileData) {
-      posts = posts?.filter(
-        (post: IBloodPost) => post?.district === myProfileData[0]?.district
+    let filteredPosts: IBloodPost[] = [];
+    if (data?.data) {
+      filteredPosts = [...data?.data];
+    }
+    if (!token) return filteredPosts;
+
+    console.log(filteredPosts);
+
+    // Filter by district if user is logged in
+    if (currentUser && users?.data) {
+      const myProfileData = users.data.find(
+        (user: IUser) => user.name === currentUser.name
       );
-      if (myProfileData[0]?.bloodGroup === "AB+") {
-        posts = posts?.filter((post: IBloodPost) => post?.bloodGroup === "AB+");
-      } else if (myProfileData[0]?.bloodGroup === "A+") {
-        posts = posts?.filter((post: IBloodPost) =>
-          ["A+", "AB+"].includes(post?.bloodGroup)
+
+      if (myProfileData) {
+        filteredPosts = filteredPosts.filter(
+          (post: IBloodPost) => post.district === myProfileData.district
         );
-      } else if (myProfileData[0]?.bloodGroup === "B+") {
-        posts = posts?.filter((post: IBloodPost) =>
-          ["B+", "AB+"].includes(post?.bloodGroup)
+
+        // Filter by blood group compatibility
+        const compatibleGroups = getCompatibleBloodGroups(
+          myProfileData.bloodGroup
         );
-      } else if (myProfileData[0]?.bloodGroup === "O+") {
-        posts = posts?.filter((post: IBloodPost) =>
-          ["O+", "A+", "B+", "AB+"].includes(post?.bloodGroup)
-        );
-      } else if (myProfileData[0]?.bloodGroup === "A-") {
-        posts = posts?.filter((post: IBloodPost) =>
-          ["A-", "A+", "AB+", "AB-"].includes(post?.bloodGroup)
-        );
-      } else if (myProfileData[0]?.bloodGroup === "B-") {
-        posts = posts?.filter((post: IBloodPost) =>
-          ["B-", "B+", "AB+", "AB-"].includes(post?.bloodGroup)
-        );
-      } else if (myProfileData[0]?.bloodGroup === "AB-") {
-        posts = posts?.filter((post: IBloodPost) =>
-          ["AB+", "AB-"].includes(post?.bloodGroup)
-        );
+        console.log(compatibleGroups);
+        if (compatibleGroups) {
+          filteredPosts = filteredPosts.filter((post: IBloodPost) =>
+            compatibleGroups.includes(post.bloodGroup)
+          );
+        }
       }
     }
-  }
 
-  // Handle the select change
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSelectChange = (e: { target: { value: any } }, id: string) => {
-    setSelectedPostValue(id);
-    setSelectedReceiverValue(e.target.value);
-  };
+    return filteredPosts;
+  }, [currentUser, data?.data, token, users?.data]);
 
   // Handle form submission
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -100,6 +108,14 @@ const BloodPosts = () => {
     const requestData = { request };
     try {
       const requestInfo = await addRequest(requestData).unwrap();
+      console.log("requestInfo", requestInfo);
+      const userId = requestInfo?.data?.receiver;
+      const info = { requestId: requestInfo?.data?._id };
+      const donationInfo = await addDonationHistory({
+        userId,
+        info,
+      }).unwrap();
+      console.log(donationInfo);
       if (requestInfo.success === false) {
         toast.error(requestInfo.errMessage);
       } else {
@@ -110,16 +126,38 @@ const BloodPosts = () => {
     }
   };
 
-  console.log(posts);
+  // Handle the select change
+  const handleSelectChange = (
+    e: { target: { value: SetStateAction<string> } },
+    id: string
+  ) => {
+    console.log(e.target.value, id);
+    setSelectedPostValue(id);
+    setSelectedReceiverValue(e.target.value);
+  };
 
-  // useEffect(() => {
-  //   dispatch(removeRoute());
-  // }, []);
+  const handleRefer = () => {
+    if (!user) {
+      router.push("/login");
+    } else {
+      (document.getElementById("my_modal_1") as HTMLDialogElement).showModal();
+    }
+  };
+
+  // const x = connectUser?.data[0]?.friends;
+  // console.log(
+  //   x,
+  //   x?.map((item: IUser) => console.log(item?.name))
+  // );
+
+  useEffect(() => {
+    dispatch(removeRoute());
+  }, [dispatch]);
 
   return (
     <div className="mb-14">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {posts?.map((post: IBloodPost) => (
+        {posts?.slice(0, 6)?.map((post: IBloodPost) => (
           <div key={post._id} className="card bg-base-100 w-76 shadow-xl">
             <div className="card-body">
               <h2 className="card-title">
@@ -148,11 +186,7 @@ const BloodPosts = () => {
               <hr className="my-4 text-red-500" />
               <div className="card-actions justify-center">
                 <button
-                  onClick={() =>
-                    (
-                      document.getElementById("my_modal_1") as HTMLDialogElement
-                    ).showModal()
-                  }
+                  onClick={() => handleRefer()}
                   className="btn bg-cyan-200"
                 >
                   Refer
@@ -178,19 +212,14 @@ const BloodPosts = () => {
                         <option value="" disabled>
                           Select a donar
                         </option>
-                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                        {connectUser?.data[0]?.friends
-                          ?.filter(
-                            (user: IUser) =>
-                              user?.bloodGroup === post?.bloodGroup
-                          )
-                          .map((user: IUser) => {
-                            return (
-                              <option key={user?._id} value={user?._id}>
-                                {user?.name}
-                              </option>
-                            );
-                          })}
+
+                        {connectUser?.data[0]?.friends?.map((users: IUser) => {
+                          return (
+                            <option key={users?._id} value={users?._id}>
+                              {users?.name}
+                            </option>
+                          );
+                        })}
                       </select>
                       <br />
 
