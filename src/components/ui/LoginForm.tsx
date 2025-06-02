@@ -39,7 +39,10 @@ const LoginForm = () => {
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      console.log(err.message);
+      console.log(err);
+      if (err?.data?.success === false) {
+        toast.error(err?.data?.errMessage);
+      }
     }
 
     router.push(pathname || "/");

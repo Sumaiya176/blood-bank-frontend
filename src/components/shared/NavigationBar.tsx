@@ -5,20 +5,32 @@ import {
   useCurrentToken,
   useCurrentUser,
 } from "@/redux/features/auth/authSlice";
-import { useAllUsersQuery } from "@/redux/features/auth/userAuth";
+import {
+  useAllUsersQuery,
+  useLogOutMutation,
+} from "@/redux/features/auth/userAuth";
+import { useLazyReceivedRequestQuery } from "@/redux/features/donarRequest/donarRequestApi";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { IUser } from "@/types/userTypes";
 import Image from "next/image";
 //import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+//import { useEffect } from "react";
 
 const NavigationBar = () => {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const token = useAppSelector(useCurrentToken);
   const currentUser = useAppSelector(useCurrentUser);
-  const { data: users, refetch } = useAllUsersQuery("");
+  const { data: users } = useAllUsersQuery(undefined);
+  const [logOutApi] = useLogOutMutation();
+  const user = useAppSelector(useCurrentUser);
+  const [trigger, { data }] = useLazyReceivedRequestQuery();
 
+  //console.log(token, currentUser);
+  //console.log(currentAuth);
   let myProfileData;
   if (users) {
     myProfileData = users?.data?.filter(
@@ -26,9 +38,21 @@ const NavigationBar = () => {
     );
   }
 
+  const handleLogoutBtn = async () => {
+    try {
+      await logOutApi().unwrap();
+      dispatch(logout());
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   useEffect(() => {
-    refetch();
-  });
+    if (user) {
+      trigger(user?.id);
+    }
+  }, [user, trigger]);
 
   return (
     <div className="sticky top-0 z-10 pb-4">
@@ -68,7 +92,30 @@ const NavigationBar = () => {
                 <Link href="/createPost">Add Post</Link>
               </li>
               <li>
-                <Link href="/receivedRequest">Received Request</Link>
+                <div className="indicator">
+                  <Link
+                    href="/receivedRequest"
+                    className="indicator-item indicator-center"
+                  >
+                    Received Request
+                  </Link>
+                  {data?.data.count > 0 && (
+                    <span className="badge badge-sm bg-red-600 text-white absolute top-0 right-[-10px]">
+                      {data?.data.count}4
+                    </span>
+                  )}
+                </div>
+                <div className="indicator">
+                  <Link
+                    href="/receivedRequest"
+                    className="indicator-item indicator-center"
+                  >
+                    Received Request
+                  </Link>
+                  <span className="badge text-base badge-sm indicator-item text-red-600">
+                    {myProfileData ? myProfileData[0]?.points : ""}
+                  </span>
+                </div>
               </li>
             </ul>
           </div>
@@ -91,7 +138,14 @@ const NavigationBar = () => {
               <Link href="/createPost">Add Post</Link>
             </li>
             <li>
-              <Link href="/receivedRequest">Received Request</Link>
+              <div className="indicator">
+                {data?.data.count > 0 && (
+                  <span className="indicator-item badge badge-primary">
+                    12{data?.data.count}
+                  </span>
+                )}
+                <Link href="/receivedRequest">Received Request</Link>
+              </div>
             </li>
           </ul>
         </div>
@@ -152,7 +206,10 @@ const NavigationBar = () => {
                     <Link href="/connection">Make Connection</Link>
                   </li>
                   <li>
-                    <p onClick={() => dispatch(logout())} className="btn">
+                    <Link href="/createReview">Review</Link>
+                  </li>
+                  <li>
+                    <p onClick={() => handleLogoutBtn()} className="btn">
                       Logout
                     </p>
                     {/* {token ? (

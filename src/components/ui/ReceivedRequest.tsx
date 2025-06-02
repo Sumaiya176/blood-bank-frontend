@@ -2,15 +2,16 @@
 
 import { useCurrentUser } from "@/redux/features/auth/authSlice";
 import { useChangeDonarRequestStatusMutation } from "@/redux/features/bloodPost/bloodPostApi";
-import { useReceivedRequestQuery } from "@/redux/features/donarRequest/donarRequestApi";
+import { useLazyReceivedRequestQuery } from "@/redux/features/donarRequest/donarRequestApi";
 import { useAppSelector } from "@/redux/hooks";
 import withAuth from "@/utils/withAuth";
+import { useEffect } from "react";
 
 import { toast } from "react-hot-toast";
 
 const ReceivedRequest = () => {
   const user = useAppSelector(useCurrentUser);
-  const { data } = useReceivedRequestQuery(user?.id);
+  const [trigger, { data }] = useLazyReceivedRequestQuery();
   const [changeDonarRequestStatus] = useChangeDonarRequestStatusMutation();
 
   const handleAcceptBtn = async (requestId: string) => {
@@ -50,6 +51,12 @@ const ReceivedRequest = () => {
   };
 
   console.log(data?.data);
+
+  useEffect(() => {
+    if (user) {
+      trigger(user?.id);
+    }
+  }, [user, trigger]);
 
   return (
     <div>

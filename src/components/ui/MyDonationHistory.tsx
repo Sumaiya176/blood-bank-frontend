@@ -6,6 +6,7 @@ import React from "react";
 
 const MyDonationHistory = () => {
   const { data } = useGetMyDonationHistoryQuery("");
+
   console.log(data?.data?.donationHistory);
 
   return (
@@ -43,14 +44,14 @@ const MyDonationHistory = () => {
                     className={`${
                       item?.post?.status === "donated"
                         ? "bg-green-600"
-                        : item?.post?.status === "canceled"
+                        : item?.post?.status === "cancelled"
                         ? "bg-red-600"
                         : item?.post?.status === "due"
                         ? "bg-emerald-400"
                         : "bg-yellow-600"
                     } rounded text-center text-white`}
                   >
-                    {item?.status}
+                    {item?.post?.status}
                   </td>
                 </tr>
               );

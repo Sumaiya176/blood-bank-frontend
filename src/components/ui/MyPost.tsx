@@ -33,7 +33,7 @@ const MyPost = () => {
   const [selectedRow, setSelectedRow] = useState<Inputs>();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  console.log(data?.data?.postHistory);
+  console.log(data?.data);
   const {
     register,
     handleSubmit,
@@ -161,6 +161,7 @@ const MyPost = () => {
                     >
                       <option value="pending">Pending</option>
                       <option value="donated">Donated</option>
+                      <option value="cancelled">Cancelled</option>
                     </select>
                   </td>
                   <td className="space-x-2 text-center">

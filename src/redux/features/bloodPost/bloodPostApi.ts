@@ -3,8 +3,8 @@ import { baseApi } from "@/redux/api/baseApi";
 const bloodPostApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getBloodPosts: builder.query({
-      query: () => ({
-        url: "/blood-posts",
+      query: ({ page = 1, limit = 20 }) => ({
+        url: `/blood-posts?page=${page}&limit=${limit}`,
         method: "GET",
       }),
       providesTags: ["BloodPost"],

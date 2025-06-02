@@ -103,6 +103,59 @@ const authApi = baseApi.injectEndpoints({
       },
       providesTags: ["RequestedDonor"],
     }),
+
+    verifyEmail: builder.query({
+      query: (token) => ({
+        url: `/auth/verify-email?token=${token}`,
+        method: "GET",
+      }),
+    }),
+
+    forgotPassword: builder.mutation({
+      query: ({ email }) => {
+        console.log(email);
+        return {
+          url: `/users/forgot-password?email=${email}`,
+          method: "POST",
+        };
+      },
+    }),
+
+    verifyOtp: builder.mutation({
+      query: (otp) => {
+        console.log(otp);
+        return {
+          url: `/users/verify-otp?otp=${otp}`,
+          method: "POST",
+        };
+      },
+    }),
+
+    resetPassword: builder.mutation({
+      query: ({ data }) => {
+        console.log(data);
+        return {
+          url: `/users/reset-password`,
+          method: "POST",
+          body: data,
+        };
+      },
+    }),
+
+    updateLastSeen: builder.mutation<void, void>({
+      query: () => ({
+        url: `/users/update-last-seen`,
+        method: "PUT",
+        credentials: "include",
+      }),
+    }),
+
+    logOut: builder.mutation<void, void>({
+      query: () => ({
+        url: `/auth/logout`,
+        method: "POST",
+      }),
+    }),
   }),
 });
 
@@ -115,7 +168,13 @@ export const {
   useGetMyDonationHistoryQuery,
   useAllUsersQuery,
   useMakeConnectionMutation,
-  useConnectedUsersQuery,
+  useLazyConnectedUsersQuery,
   usePointReductionMutation,
   useRequestedDonorQuery,
+  useVerifyEmailQuery,
+  useForgotPasswordMutation,
+  useVerifyOtpMutation,
+  useResetPasswordMutation,
+  useUpdateLastSeenMutation,
+  useLogOutMutation,
 } = authApi;

@@ -13,6 +13,7 @@ import { toast } from "react-hot-toast";
 import React, { useEffect, useState } from "react";
 import { districtData } from "@/utils/districtData";
 import withAuth from "@/utils/withAuth";
+import Link from "next/link";
 
 type Inputs = {
   name: string;
@@ -118,21 +119,26 @@ const Profile = () => {
                 <p className="py-2 px-6 rounded bg-white">{user?.bloodGroup}</p>
               </div>
               <div className="text-center mt-12">
-                <button
-                  className="bg-red-600 text-white py-2 px-4 rounded"
-                  onClick={() => {
-                    const modal = document.getElementById(
-                      "my_modal_5"
-                    ) as HTMLDialogElement | null;
-                    if (modal) {
-                      modal.showModal();
-                    } else {
-                      console.error("Modal element not found.");
-                    }
-                  }}
-                >
-                  Edit Profile
-                </button>
+                <div className="flex justify-center gap-3">
+                  <button
+                    className="bg-red-600 text-white py-2 px-4 rounded"
+                    onClick={() => {
+                      const modal = document.getElementById(
+                        "my_modal_5"
+                      ) as HTMLDialogElement | null;
+                      if (modal) {
+                        modal.showModal();
+                      } else {
+                        console.error("Modal element not found.");
+                      }
+                    }}
+                  >
+                    Edit Profile
+                  </button>
+                  <button className="bg-red-600 text-white py-2 px-4 rounded">
+                    <Link href="/changePassword">Change Password</Link>
+                  </button>
+                </div>
                 <dialog
                   id="my_modal_5"
                   className="modal modal-bottom sm:modal-middle"

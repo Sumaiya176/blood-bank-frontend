@@ -1,5 +1,6 @@
-// import type { Config } from "tailwindcss";
-//import daisyui from "daisyui";
+import daisyui from "daisyui";
+import flowbite from "flowbite/plugin";
+import scrollbarHide from "tailwind-scrollbar-hide";
 
 module.exports = {
   content: [
@@ -17,7 +18,7 @@ module.exports = {
     },
   },
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  plugins: [require("daisyui"), require("flowbite-react")],
+  plugins: [daisyui, flowbite, scrollbarHide],
   // daisyui: {
   //   themes: ["valentine"],
   // },

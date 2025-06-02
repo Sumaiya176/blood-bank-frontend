@@ -13,14 +13,25 @@ const withAuth = (Component) => {
     const router = useRouter();
     const pathname = usePathname();
     const dispatch = useDispatch();
+    //const { updateLastSeen } = useUpdateLastSeenMutation();
 
     useEffect(() => {
       if (!token) {
         dispatch(setRoute({ path: pathname }));
         router.push(`/login?redirect=${pathname}`);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [router, token, pathname]);
+
+      // const update = () => {
+      //   updateLastSeen()
+      //     .unwrap()
+      //     .catch((err) => console.error("Last seen update failed", err));
+      // };
+
+      // update(); // call immediately
+      // const intervalId = setInterval(update, 5 * 60 * 1000); // every 5 mins
+
+      // return () => clearInterval(intervalId);
+    }, [router, token, pathname, dispatch]);
 
     return <Component {...props} />;
   };

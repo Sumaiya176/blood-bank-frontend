@@ -7,7 +7,7 @@ import {
 } from "@/redux/features/auth/authSlice";
 import {
   useAllUsersQuery,
-  useConnectedUsersQuery,
+  useLazyConnectedUsersQuery,
 } from "@/redux/features/auth/userAuth";
 import {
   useAddPostHistoryMutation,
@@ -23,11 +23,12 @@ import { useRouter } from "next/navigation";
 
 const BloodPosts = () => {
   const [selectedPostValue, setSelectedPostValue] = useState("");
+  const [selectedPost, setSelectedPost] = useState<IBloodPost | null>(null);
   const [selectedReceiverValue, setSelectedReceiverValue] = useState("");
   const user = useAppSelector(useCurrentUser);
   const token = useAppSelector(useCurrentToken);
   const { data } = useGetBloodPostsQuery("");
-  const { data: connectUser } = useConnectedUsersQuery("");
+  const [trigger, { data: connectUser }] = useLazyConnectedUsersQuery();
   const [addRequest] = useSendRequestMutation();
   const [addDonationHistory] = useAddPostHistoryMutation();
   const { data: users } = useAllUsersQuery(undefined);
@@ -35,6 +36,7 @@ const BloodPosts = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
 
+  // console.log(user, user?.id);
   //Helper function to determine compatible blood groups
   const getCompatibleBloodGroups = (bloodGroup: string) => {
     switch (bloodGroup) {
@@ -59,7 +61,7 @@ const BloodPosts = () => {
 
   //Memoize filtered posts
   const posts = useMemo(() => {
-    console.log(data?.data);
+    // console.log(data?.data);
 
     let filteredPosts: IBloodPost[] = [];
     if (data?.data) {
@@ -67,7 +69,7 @@ const BloodPosts = () => {
     }
     if (!token) return filteredPosts;
 
-    console.log(filteredPosts);
+    // console.log(filteredPosts);
 
     // Filter by district if user is logged in
     if (currentUser && users?.data) {
@@ -84,7 +86,7 @@ const BloodPosts = () => {
         const compatibleGroups = getCompatibleBloodGroups(
           myProfileData.bloodGroup
         );
-        console.log(compatibleGroups);
+        //console.log(compatibleGroups);
         if (compatibleGroups) {
           filteredPosts = filteredPosts.filter((post: IBloodPost) =>
             compatibleGroups.includes(post.bloodGroup)
@@ -136,7 +138,8 @@ const BloodPosts = () => {
     setSelectedReceiverValue(e.target.value);
   };
 
-  const handleRefer = () => {
+  const handleRefer = (post: IBloodPost) => {
+    setSelectedPost(post);
     if (!user) {
       router.push("/login");
     } else {
@@ -151,8 +154,9 @@ const BloodPosts = () => {
   // );
 
   useEffect(() => {
+    if (user) trigger(user?.id);
     dispatch(removeRoute());
-  }, [dispatch]);
+  }, [dispatch, trigger, user]);
 
   return (
     <div className="mb-14">
@@ -186,53 +190,12 @@ const BloodPosts = () => {
               <hr className="my-4 text-red-500" />
               <div className="card-actions justify-center">
                 <button
-                  onClick={() => handleRefer()}
+                  onClick={() => handleRefer(post)}
                   className="btn bg-cyan-200"
                 >
                   Refer
                 </button>
-                {/* ------------ start modal ---------------- */}
-                <dialog id="my_modal_1" className="modal">
-                  <div className="modal-box">
-                    <form method="dialog">
-                      <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-                        ✕
-                      </button>
-                    </form>
 
-                    <form onSubmit={handleSubmit}>
-                      <label htmlFor="options">Choose a receiver:</label>
-                      <br />
-                      <select
-                        id="options"
-                        value={selectedPostValue}
-                        onChange={(e) => handleSelectChange(e, post._id)}
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block h-14 w-full p-2.5"
-                      >
-                        <option value="" disabled>
-                          Select a donar
-                        </option>
-
-                        {connectUser?.data[0]?.friends?.map((users: IUser) => {
-                          return (
-                            <option key={users?._id} value={users?._id}>
-                              {users?.name}
-                            </option>
-                          );
-                        })}
-                      </select>
-                      <br />
-
-                      <button
-                        type="submit"
-                        className="text-white mt-4 inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-                      >
-                        Send
-                      </button>
-                    </form>
-                  </div>
-                </dialog>
-                {/* -------------- end modal ---------------- */}
                 <button
                   onClick={() => router.push(`/bloodPost/${post?._id}`)}
                   //onClick={() => router.push(`/bloodPost/${post?._id}`)}
@@ -245,6 +208,50 @@ const BloodPosts = () => {
           </div>
         ))}
       </div>
+      {/* ------------ start modal ---------------- */}
+      <dialog id="my_modal_1" className="modal">
+        <div className="modal-box">
+          <form method="dialog">
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+              ✕
+            </button>
+          </form>
+
+          <form onSubmit={handleSubmit}>
+            <label htmlFor="options">Choose a receiver:</label>
+            <br />
+            <select
+              id="options"
+              //value={selectedPostValue}
+              onChange={(e) =>
+                handleSelectChange(e, selectedPost?._id as string)
+              }
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block h-14 w-full p-2.5"
+            >
+              <option value="" disabled>
+                Select a donar
+              </option>
+
+              {connectUser?.data[0]?.friends?.map((users: IUser) => {
+                return (
+                  <option key={users?._id} value={users?._id}>
+                    {users?.name}
+                  </option>
+                );
+              })}
+            </select>
+            <br />
+
+            <button
+              type="submit"
+              className="text-white mt-4 inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+            >
+              Send
+            </button>
+          </form>
+        </div>
+      </dialog>
+      {/* -------------- end modal ---------------- */}
     </div>
   );
 };

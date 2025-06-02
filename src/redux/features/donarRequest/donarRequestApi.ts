@@ -42,7 +42,7 @@ const donarRequest = baseApi.injectEndpoints({
 
 export const {
   useSendRequestMutation,
-  useReceivedRequestQuery,
+  useLazyReceivedRequestQuery,
   useStatusAcceptedMutation,
   useStatusRejectedMutation,
 } = donarRequest;

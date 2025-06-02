@@ -1,7 +1,7 @@
 "use client";
 
 import { removeRoute, useCurrentUser } from "@/redux/features/auth/authSlice";
-import { useConnectedUsersQuery } from "@/redux/features/auth/userAuth";
+import { useLazyConnectedUsersQuery } from "@/redux/features/auth/userAuth";
 import {
   useAddPostHistoryMutation,
   useGetBloodPostsQuery,
@@ -20,10 +20,13 @@ const bloodGroups = ["A+", "B+", "A-", "B-", "AB+", "AB-", "O+", "O-"];
 const AllBloodPosts = () => {
   const [selectedPostValue, setSelectedPostValue] = useState("");
   const [selectedReceiverValue, setSelectedReceiverValue] = useState("");
-  const [posts, setPosts] = useState<IBloodPost[]>();
+  const [page, setPage] = useState(1);
+
   const user = useAppSelector(useCurrentUser);
-  const { data } = useGetBloodPostsQuery("");
-  const { data: connectUser } = useConnectedUsersQuery("");
+  const limit = 9;
+  const [posts, setPosts] = useState<IBloodPost[]>([]);
+  const { data: dataPost } = useGetBloodPostsQuery({ page, limit });
+  const [triggerConnectedUsers, result] = useLazyConnectedUsersQuery();
   const [addRequest] = useSendRequestMutation();
   const [addDonationHistory] = useAddPostHistoryMutation();
   const dispatch = useAppDispatch();
@@ -80,7 +83,7 @@ const AllBloodPosts = () => {
     console.log(e.target.value);
     const group = e.target.value;
     setPosts(
-      data?.data?.filter((post: IBloodPost) => post?.bloodGroup === group)
+      dataPost?.data?.filter((post: IBloodPost) => post?.bloodGroup === group)
     );
   };
 
@@ -88,15 +91,22 @@ const AllBloodPosts = () => {
     console.log(e.target.value);
     const district = e.target.value;
     setPosts(
-      data?.data?.filter((post: IBloodPost) => post?.district === district)
+      dataPost?.data?.filter((post: IBloodPost) => post?.district === district)
     );
   };
 
-  console.log(connectUser?.data[0]?.friends);
+  console.log(dataPost);
   useEffect(() => {
-    setPosts(data?.data);
+    triggerConnectedUsers("");
+    if (dataPost?.data?.length) {
+      const filteredDataPost = dataPost?.data.filter(
+        (post: IBloodPost) => post?.status === "pending"
+      );
+      setPosts((prev) => [...prev, ...filteredDataPost]);
+    }
     dispatch(removeRoute());
-  }, [dispatch, data?.data]);
+  }, [dispatch, dataPost?.data, triggerConnectedUsers]);
+  const { data } = result;
   return (
     <div className="mb-14">
       <div className="md:flex md:gap-10">
@@ -135,8 +145,8 @@ const AllBloodPosts = () => {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {posts?.map((post: IBloodPost) => (
-          <div key={post._id} className="card bg-base-100 w-76 shadow-xl">
+        {posts?.map((post: IBloodPost, i: number) => (
+          <div key={i} className="card bg-base-100 w-76 shadow-xl">
             <div className="card-body">
               <h2 className="card-title">
                 <span className="text-red-600 font-bold">
@@ -191,7 +201,7 @@ const AllBloodPosts = () => {
                           Select a donar
                         </option>
 
-                        {connectUser?.data[0]?.friends?.map((user: IUser) => {
+                        {data?.data[0]?.friends?.map((user: IUser) => {
                           return (
                             <option key={user?._id} value={user?._id}>
                               {user?.name}
@@ -222,6 +232,14 @@ const AllBloodPosts = () => {
             </div>
           </div>
         ))}
+      </div>
+      <div className="flex justify-center my-10">
+        <button
+          onClick={() => setPage((prev) => prev + 1)}
+          className="border-2 border-black font-semibold tracking-wide text-xl px-16 py-5"
+        >
+          See More
+        </button>
       </div>
     </div>
   );
